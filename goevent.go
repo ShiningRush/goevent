@@ -43,7 +43,7 @@ type InMemoryEventBus struct {
 	handlers map[string][]EventHandler
 	mutex    sync.Mutex
 
-	closed uint32
+	closed atomic.Bool
 	wg     sync.WaitGroup
 }
 
@@ -61,7 +61,7 @@ func (b *InMemoryEventBus) Subscribe(handler EventHandler) error {
 
 // Publish a event and DO NOT wait the handler executing
 func (b *InMemoryEventBus) Publish(event Event) {
-	if b.closed > 0 {
+	if b.closed.Load() {
 		panic("event bus is already closed")
 	}
 
@@ -79,7 +79,7 @@ func (b *InMemoryEventBus) Publish(event Event) {
 
 // PublishSync a event and WILL wait the handler executing
 func (b *InMemoryEventBus) PublishSync(ctx context.Context, event Event) {
-	if b.closed > 0 {
+	if b.closed.Load() {
 		panic("event bus is already closed")
 	}
 
@@ -99,8 +99,8 @@ func (b *InMemoryEventBus) PublishSync(ctx context.Context, event Event) {
 
 // Close will wait all async goroutine completed to prevent lost changes
 func (b *InMemoryEventBus) Close() {
-	if b.closed == 0 {
-		atomic.AddUint32(&b.closed, 1)
+	if !b.closed.Load() {
+		b.closed.Store(true)
 	}
 	b.wg.Wait()
 }
