@@ -1,5 +1,41 @@
-# goevent
-goevent is a simple pub/sub model in memory.
+# goevent (Deprecated)
+
+goevent is a simple in-memory pub/sub library.
+
+This project is deprecated. Please use `github.com/shiningrush/goext/runx/eventx` in new code.
+
+The `github.com/shiningrush/goevent` package is kept only as a compatibility layer and now forwards to the latest `goext/runx/eventx` implementation.
+
+## migration
+
+Recommended import:
+
+```go
+import "github.com/shiningrush/goext/runx/eventx"
+```
+
+Old code:
+
+```go
+import "github.com/shiningrush/goevent"
+```
+
+New code:
+
+```go
+import "github.com/shiningrush/goext/runx/eventx"
+```
+
+Most public APIs map directly:
+
+- `goevent.Event` -> `eventx.Event`
+- `goevent.EventHandler` -> `eventx.EventHandler`
+- `goevent.EventBus` -> `eventx.EventBus`
+- `goevent.NewInMemoryEventBus` -> `eventx.NewInMemoryEventBus`
+- `goevent.Subscribe` -> `eventx.Subscribe`
+- `goevent.Publish` -> `eventx.Publish`
+- `goevent.PublishSync` -> `eventx.PublishSync`
+- `goevent.Close` -> `eventx.Close`
 
 ## usage
 ```go
@@ -10,7 +46,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/shiningrush/goevent"
+
+	"github.com/shiningrush/goext/runx/eventx"
 )
 
 type DemoEventA struct {
@@ -36,7 +73,7 @@ func (h *TestEventHandler) Topic() []string {
 	return []string{"topicX", "topicY", "topicZ"}
 }
 
-func (h *TestEventHandler) Handle(cxt context.Context, event goevent.Event) {
+func (h *TestEventHandler) Handle(cxt context.Context, event eventx.Event) {
 	if eventA, ok := event.(*DemoEventA); ok {
 		fmt.Println("get event a, key: ", eventA.Key)
 	}
@@ -47,17 +84,17 @@ func (h *TestEventHandler) Handle(cxt context.Context, event goevent.Event) {
 
 func main() {
 	// sub
-	err := goevent.Subscribe(&TestEventHandler{})
+	err := eventx.Subscribe(&TestEventHandler{})
 	if err != nil {
 		panic(err)
 	}
 
-	var e goevent.Event
+	var e eventx.Event
 	e = &DemoEventA{Key: "value a"}
 	// should print "get event a, key:  value a" twice, because handler subscribe all topics
-	goevent.PublishSync(context.TODO(), e)
+	eventx.PublishSync(context.TODO(), e)
 
 	e = &DemoEventB{Key: "value b"}
-	goevent.PublishSync(context.TODO(), e)
+	eventx.PublishSync(context.TODO(), e)
 }
 ```

@@ -18,6 +18,11 @@ func BenchmarkInMemoryEventBus_Close(b *testing.B) {
 }
 
 func BenchmarkInMemoryEventBus(b *testing.B) {
+	SetEventBus(NewInMemoryEventBus())
+	b.Cleanup(func() {
+		SetEventBus(NewInMemoryEventBus())
+	})
+
 	_ = Subscribe(&TestEventHandler{})
 	_ = Subscribe(&SecTestEventHandler{})
 	e := &TestEvent{}
@@ -27,6 +32,11 @@ func BenchmarkInMemoryEventBus(b *testing.B) {
 }
 
 func BenchmarkInMemoryEventBus_Sync(b *testing.B) {
+	SetEventBus(NewInMemoryEventBus())
+	b.Cleanup(func() {
+		SetEventBus(NewInMemoryEventBus())
+	})
+
 	_ = Subscribe(&TestEventHandler{})
 	_ = Subscribe(&SecTestEventHandler{})
 

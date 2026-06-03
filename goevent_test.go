@@ -2,7 +2,6 @@ package goevent
 
 import (
 	"context"
-	"reflect"
 	"testing"
 	"time"
 
@@ -45,6 +44,11 @@ func (h *SecTestEventHandler) Handle(cxt context.Context, event Event) {
 }
 
 func TestPublish(t *testing.T) {
+	SetEventBus(NewInMemoryEventBus())
+	t.Cleanup(func() {
+		SetEventBus(NewInMemoryEventBus())
+	})
+
 	err := Subscribe(&TestEventHandler{})
 	err = Subscribe(&SecTestEventHandler{})
 
@@ -60,6 +64,11 @@ func TestPublish(t *testing.T) {
 }
 
 func TestPublishSync(t *testing.T) {
+	SetEventBus(NewInMemoryEventBus())
+	t.Cleanup(func() {
+		SetEventBus(NewInMemoryEventBus())
+	})
+
 	err := Subscribe(&TestEventHandler{})
 	err = Subscribe(&SecTestEventHandler{})
 
@@ -68,13 +77,6 @@ func TestPublishSync(t *testing.T) {
 	PublishSync(context.TODO(), e)
 	assert.Equal(t, "Handled", e.Key)
 	assert.Equal(t, "Handled2", e.Key2)
-}
-
-func TestGetEventKey(t *testing.T) {
-	bus := NewInMemoryEventBus()
-
-	key := bus.getEventTopic(reflect.TypeOf(bus))
-	assert.Equal(t, reflect.TypeOf(bus), key)
 }
 
 func TestClose(t *testing.T) {
